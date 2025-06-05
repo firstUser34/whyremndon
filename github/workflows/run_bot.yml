@@ -1,0 +1,28 @@
+name: Python Bot Every 20 Mins
+
+on:
+  schedule:
+    - cron: '*/20 * * * *'  # ⏰ Triggers every 20 minutes
+  workflow_dispatch:        # ▶️ Manual trigger
+  push:                     # 🛠️ Runs when code is pushed
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: ⬇️ Checkout repo
+      uses: actions/checkout@v3
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: 📦 Install dependencies
+      run: |
+        pip install -r requirements.txt || true
+
+    - name: 🚀 Run the bot
+      run: |
+        python main.py
