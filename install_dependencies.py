@@ -1,98 +1,83 @@
 #!/usr/bin/env python3
 """
-Dependency installer for Ultimate X Visitor Bot
+Dependency installer for Ultimate X Visitor Bot (Debian/Ubuntu)
 """
 
-import os
-import sys
 import subprocess
-import platform
+import sys
 
 def print_step(message):
-    """Print a step message"""
     print(f"\n{'='*60}\n{message}\n{'='*60}")
 
 def run_command(command, ignore_errors=False):
-    """Run a shell command and return result"""
     print(f"Running: {' '.join(command)}")
     try:
-        result = subprocess.run(command, check=not ignore_errors, 
-                               capture_output=True, text=True)
+        result = subprocess.run(command, check=not ignore_errors,
+                                capture_output=True, text=True)
         if result.stdout:
             print(result.stdout)
+        if result.stderr:
+            print(result.stderr)
         return result.returncode == 0
     except Exception as e:
-        print(f"Error: {str(e)}")
+        print(f"Error: {e}")
         return False
 
 def install_pip_packages():
-    """Install required pip packages"""
     print_step("Installing Python dependencies")
-    packages = ["requests", "selenium", "fake-useragent"]
-    
-    # Check if pip is available
+    packages = ["requests", "selenium", "fake-useragent", "webdriver-manager"]
+
     if run_command([sys.executable, "-m", "pip", "--version"], ignore_errors=True):
         run_command([sys.executable, "-m", "pip", "install", "--upgrade", "pip"])
         run_command([sys.executable, "-m", "pip", "install"] + packages)
+        return True
     else:
-        print("pip not available. Please install pip first.")
+        print("pip not found. Please install pip manually.")
         return False
-    
+
+def install_chrome_ubuntu():
+    print_step("Installing Google Chrome and dependencies on Debian/Ubuntu")
+
+    # Update package lists
+    if not run_command(["sudo", "apt-get", "update", "-y"]):
+        return False
+
+    # Install dependencies for Chrome
+    if not run_command(["sudo", "apt-get", "install", "-y", "wget", "gnupg", "ca-certificates"]):
+        return False
+
+    # Add Google Chrome's official GPG key and repo
+    run_command(["wget", "-q", "-O", "-", "https://dl.google.com/linux/linux_signing_key.pub"], ignore_errors=True)
+    run_command(["sudo", "apt-key", "add", "-"], ignore_errors=True)
+    run_command([
+        "sudo", "sh", "-c",
+        "echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' >> /etc/apt/sources.list.d/google-chrome.list"
+    ], ignore_errors=True)
+
+    # Update package list again after adding repo
+    if not run_command(["sudo", "apt-get", "update", "-y"]):
+        return False
+
+    # Install Google Chrome stable
+    if not run_command(["sudo", "apt-get", "install", "-y", "google-chrome-stable"]):
+        return False
+
+    print("Google Chrome installed successfully!")
     return True
 
-def install_chrome_linux():
-    """Install Chrome and ChromeDriver on Linux"""
-    print_step("Installing Chrome and ChromeDriver on Linux")
-    
-    # Check if we're on Replit
-    if os.path.exists("/home/runner"):
-        print("Detected Replit environment")
-        try:
-            # Try to install via nix
-            run_command(["nix-env", "-iA", "nixpkgs.chromium"], ignore_errors=True)
-            run_command(["nix-env", "-iA", "nixpkgs.chromedriver"], ignore_errors=True)
-            return True
-        except:
-            print("Failed to install via nix-env")
-    
-    # Try apt-get for Debian/Ubuntu
-    if os.path.exists("/usr/bin/apt-get"):
-        run_command(["apt-get", "update"], ignore_errors=True)
-        run_command(["apt-get", "install", "-y", "chromium-browser", "chromium-driver"], ignore_errors=True)
-        return True
-    
-    # Try yum for CentOS/RHEL
-    if os.path.exists("/usr/bin/yum"):
-        run_command(["yum", "install", "-y", "chromium", "chromedriver"], ignore_errors=True)
-        return True
-    
-    print("Could not install Chrome automatically. Please install Chrome and ChromeDriver manually.")
-    return False
-
 def main():
-    """Main installer function"""
-    print_step("Ultimate X Visitor Bot - Dependency Installer")
-    
-    # Install pip packages
+    print_step("Ultimate X Visitor Bot - Dependency Installer (Debian/Ubuntu)")
+
     pip_success = install_pip_packages()
-    
-    # Install system dependencies based on platform
-    system = platform.system().lower()
-    if system == "linux":
-        chrome_success = install_chrome_linux()
-    else:
-        print(f"Automatic Chrome installation not supported on {system}.")
-        print("Please install Chrome and ChromeDriver manually.")
-        chrome_success = False
-    
+    chrome_success = install_chrome_ubuntu()
+
     print_step("Installation Summary")
     print(f"Python packages: {'✅ Installed' if pip_success else '❌ Failed'}")
-    print(f"Chrome/ChromeDriver: {'✅ Attempted' if chrome_success else '❌ Not installed'}")
+    print(f"Google Chrome: {'✅ Installed' if chrome_success else '❌ Failed or Not Installed'}")
+
     print("\nYou can now run the bot with: python ultimate_x_visitor.py")
-    
     if not chrome_success:
-        print("\nNote: Browser automation will be disabled without Chrome/ChromeDriver.")
-        print("The bot will still work using HTTP requests only.")
+        print("Warning: Chrome installation failed, browser automation might not work!")
 
 if __name__ == "__main__":
     main()
