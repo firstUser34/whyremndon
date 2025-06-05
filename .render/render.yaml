@@ -1,12 +1,12 @@
-services:
-  - type: worker
-    name: ultimate-x-visitor
-    env: python
-    plan: free
-    branch: main
-    repo: https://github.com/firstUser34/whyremndon
-    buildCommand: |
-      pip install -r requirements.txt
-      python cromereq.py
-    startCommand: python run.py
-    autoDeploy: false
+# services:
+#   - type: worker
+#     name: ultimate-x-visitor
+#     env: python
+#     plan: free
+#     branch: main
+#     repo: https://github.com/firstUser34/whyremndon
+#     buildCommand: |
+#       pip install -r requirements.txt
+#       python cromereq.py
+#     startCommand: python run.py
+#     autoDeploy: false
