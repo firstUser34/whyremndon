@@ -1,39 +1,39 @@
-name: Deploy and Run Bot
+# name: Deploy and Run Bot
 
-on:
-  push:
-    branches:
-      - main
-  schedule:
-    - cron: '*/20 * * * *'  # every 20 minutes
-  workflow_dispatch:         # manual trigger
+# on:
+#   push:
+#     branches:
+#       - main
+#   schedule:
+#     - cron: '*/20 * * * *'  # every 20 minutes
+#   workflow_dispatch:         # manual trigger
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
+#       - name: Set up Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: '3.11'
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+#       - name: Install dependencies
+#         run: |
+#           python -m pip install --upgrade pip
+#           pip install -r requirements.txt
 
-      - name: Install Google Chrome
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y wget gnupg ca-certificates
-          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
-          sudo apt-get update -y
-          sudo apt-get install -y google-chrome-stable
+#       - name: Install Google Chrome
+#         run: |
+#           sudo apt-get update -y
+#           sudo apt-get install -y wget gnupg ca-certificates
+#           wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+#           echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+#           sudo apt-get update -y
+#           sudo apt-get install -y google-chrome-stable
 
-      - name: Run bot script
-        run: python run.py
+#       - name: Run bot script
+#         run: python run.py
