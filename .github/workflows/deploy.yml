@@ -1,13 +1,17 @@
-name: Deploy to Render
+name: Deploy and Run Bot
 
 on:
   push:
     branches:
       - main
+  schedule:
+    - cron: '*/20 * * * *'  # every 20 minutes
+  workflow_dispatch:         # manual trigger
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -22,11 +26,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install Chrome and ChromeDriver
+      - name: Install Google Chrome
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wget unzip
-          python cromereq.py
+          sudo apt-get update -y
+          sudo apt-get install -y wget gnupg ca-certificates
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update -y
+          sudo apt-get install -y google-chrome-stable
 
-      - name: Run the bot
+      - name: Run bot script
         run: python run.py
